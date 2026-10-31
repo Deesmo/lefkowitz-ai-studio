@@ -79,6 +79,13 @@ p { margin: 0; max-width: 64ch; }
 .msgtrack div { height: 100%; width: 0; background: var(--gold-hi); transition: width .25s linear; }
 .msgtime { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
+/* Song */
+.songplayer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.songplayer .btn { min-width: 160px; justify-content: center; }
+.lyrics { display: flex; flex-direction: column; gap: 16px; padding: 24px 28px; border-left: 1px solid var(--gold); }
+.lyrics p { font-style: italic; color: var(--sand); line-height: 1.55; }
+.lyrics .chorus { color: var(--gold-hi); font-style: normal; font-family: var(--display); letter-spacing: .05em; text-transform: uppercase; font-size: 1.02rem; }
+
 /* Sound button */
 .sound { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; background: rgba(27,28,32,.92); border: 1px solid var(--line); cursor: pointer; backdrop-filter: blur(8px); font-family: var(--display); letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; }
 .bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; width: 18px; }
@@ -200,6 +207,7 @@ footer .inner { gap: 12px; }
 footer p { font-size: .9rem; color: var(--muted); }
 
 @media (max-width: 900px) {
+  .lyrics { border-left: 0; border-top: 1px solid var(--gold); padding: 20px 0 0; }
   .split, .studio, .stepcard { grid-template-columns: minmax(0, 1fr); }
   .stepcard .who { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 18px; }
   .multiply { grid-template-columns: minmax(0, 1fr); }
@@ -240,6 +248,7 @@ footer p { font-size: .9rem; color: var(--muted); }
     <div class="hero-actions">
       <button class="btn solid" id="begin" type="button">Begin with sound</button>
       <a class="btn" href="#film">Watch your promo film</a>
+      <a class="btn" href="#song">Hear your theme song</a>
     </div>
     <div class="msgcard">
       <div class="msgface" aria-hidden="true">L</div>
@@ -385,6 +394,32 @@ footer p { font-size: .9rem; color: var(--muted); }
   </div>
 </section>
 
+<!-- SONG -->
+<section class="band" id="song" style="border-top:1px solid var(--line)">
+  <div class="inner">
+    <div class="split">
+      <div class="head">
+        <span class="eyebrow">Made for you</span>
+        <h2>"Go Confidently"</h2>
+        <p class="lead">An original theme song for Lefkowitz Plastic Surgery, written around your own tagline. Use it under the promo film, in reels, or on hold.</p>
+        <div class="songplayer">
+          <button class="btn solid" id="songBtn" type="button" aria-pressed="false">Play the song</button>
+          <div class="msgtrack" aria-hidden="true"><div id="songBar"></div></div>
+          <span id="songTime" class="msgtime">0:00 / 2:27</span>
+        </div>
+        <audio id="songAudio" src="assets/go-confidently-theme.mp3" preload="metadata"></audio>
+      </div>
+      <div class="lyrics" aria-label="Lyrics">
+        <p>Morning light on Sunset Boulevard<br>Columbia waking slow<br>You've been holding on to a quiet question<br>Only you would ever know</p>
+        <p>No rush, no pressure, only truth<br>A plan that's made for you</p>
+        <p class="chorus">Go confidently, go confidently<br>Be the one you're meant to be<br>Lefkowitz, the art of you<br>Natural, timeless, true<br>Go confidently</p>
+        <p>Steady hands and an artist's eye<br>Every question has its place<br>Someone listens, someone answers<br>Sees the story in your face</p>
+        <p>It was always you, it was always you<br>We just help the light come through</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- JOURNEY -->
 <section class="band" id="journey">
   <div class="inner">
@@ -478,7 +513,7 @@ footer p { font-size: .9rem; color: var(--muted); }
     soundBtn.classList.toggle('on', wantOn && !filmPlaying);
     soundBtn.setAttribute('aria-pressed', String(wantOn));
     soundBtn.setAttribute('aria-label', wantOn ? 'Mute music' : 'Play music');
-    soundLabel.textContent = wantOn ? (filmPlaying ? 'Paused for film' : 'Sound on') : 'Sound off';
+    soundLabel.textContent = wantOn ? (filmPlaying ? 'Paused' : 'Sound on') : 'Sound off';
   }
   function load() {
     if (loading) return loading;
@@ -543,6 +578,19 @@ footer p { font-size: .9rem; color: var(--muted); }
   msg.addEventListener('ended', msgStop);
   msg.addEventListener('timeupdate', function () { var d = msg.duration || 44; msgBar.style.width = (100 * msg.currentTime / d) + '%'; msgTime.textContent = fmt(msg.currentTime) + ' / ' + fmt(d); });
   setUI();
+
+  /* ---------- Theme song ---------- */
+  var song = document.getElementById('songAudio'), songBtn = document.getElementById('songBtn');
+  songBtn.addEventListener('click', function () {
+    if (song.paused) { if (!video.paused) video.pause(); if (!msg.paused) msg.pause(); song.play().catch(function () {}); } else { song.pause(); }
+  });
+  song.addEventListener('play', function () { filmPlaying = true; songBtn.textContent = 'Pause the song'; songBtn.setAttribute('aria-pressed', 'true'); refresh(0.8); });
+  function songStop() { filmPlaying = !video.paused; songBtn.textContent = song.ended ? 'Play again' : 'Resume the song'; songBtn.setAttribute('aria-pressed', 'false'); refresh(2); }
+  song.addEventListener('pause', songStop);
+  song.addEventListener('ended', songStop);
+  song.addEventListener('timeupdate', function () { var d = song.duration || 147; document.getElementById('songBar').style.width = (100 * song.currentTime / d) + '%'; document.getElementById('songTime').textContent = fmt(song.currentTime) + ' / ' + fmt(d); });
+  msg.addEventListener('play', function () { if (!song.paused) song.pause(); });
+  video.addEventListener('play', function () { if (!song.paused) song.pause(); });
 
   /* ---------- Privacy toggle ---------- */
   var PV = {
