@@ -69,6 +69,16 @@ p { margin: 0; max-width: 64ch; }
 .stat strong { display: block; font-family: var(--display); font-weight: 300; font-size: 2.4rem; line-height: 1; color: var(--gold-hi); font-variant-numeric: tabular-nums; }
 .stat span { font-size: 0.85rem; color: var(--muted); }
 
+/* Lucius message */
+.msgcard { display: flex; gap: 16px; align-items: center; max-width: 640px; padding: 16px 18px; border: 1px solid rgba(165,148,111,.45); background: rgba(19,20,23,.72); border-radius: 2px; backdrop-filter: blur(6px); }
+.msgface { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-size: 1.5rem; font-weight: 300; color: var(--bg); background: var(--gold); }
+.msgbody { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+.msgrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.msgrow .btn { padding: 9px 16px; font-size: .74rem; min-width: 150px; justify-content: center; }
+.msgtrack { flex: 1 1 120px; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.msgtrack div { height: 100%; width: 0; background: var(--gold-hi); transition: width .25s linear; }
+.msgtime { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
 /* Sound button */
 .sound { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; background: rgba(27,28,32,.92); border: 1px solid var(--line); cursor: pointer; backdrop-filter: blur(8px); font-family: var(--display); letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; }
 .bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; width: 18px; }
@@ -230,6 +240,18 @@ footer p { font-size: .9rem; color: var(--muted); }
     <div class="hero-actions">
       <button class="btn solid" id="begin" type="button">Begin with sound</button>
       <a class="btn" href="#film">Watch your promo film</a>
+    </div>
+    <div class="msgcard">
+      <div class="msgface" aria-hidden="true">L</div>
+      <div class="msgbody">
+        <span class="eyebrow" style="letter-spacing:.18em">A message from Lucius · Brad's AI assistant</span>
+        <div class="msgrow">
+          <button class="btn solid" id="msgBtn" type="button" aria-pressed="false">Play message</button>
+          <div class="msgtrack" aria-hidden="true"><div id="msgBar"></div></div>
+          <span id="msgTime" class="msgtime">0:00 / 0:44</span>
+        </div>
+      </div>
+      <audio id="msg" src="assets/lucius-message.mp3" preload="metadata"></audio>
     </div>
     <div class="stats" aria-label="From lefkowitzmd.com">
       <div class="stat"><strong>100+</strong><span>deep plane facelifts a year</span></div>
@@ -441,20 +463,21 @@ footer p { font-size: .9rem; color: var(--muted); }
 
 <script>
 (function () {
-  /* ---------- Music: seamless crossfaded loop of the promo score ---------- */
+  /* ---------- Music: one pre-mixed seamless 2:51 loop (no live stitching) ---------- */
   var soundBtn = document.getElementById('sound');
   var soundLabel = document.getElementById('soundLabel');
   var video = document.getElementById('promo');
-  var VOL = 0.55, XF = 6;
-  var ctx = null, master = null, buf = null, nextAt = 0, pumpTimer = null, loading = null;
-  var fallback = null, wantOn = false, ducked = false;
+  var msg = document.getElementById('msg');
+  var VOL = 0.55, DUCK = 0.12;
+  var ctx = null, master = null, src = null, loading = null, fallback = null;
+  var wantOn = false, filmPlaying = false, msgPlaying = false;
 
+  function target() { return filmPlaying ? 0 : (msgPlaying ? DUCK : VOL); }
   function setUI() {
-    var on = wantOn && !ducked;
-    soundBtn.classList.toggle('on', on);
+    soundBtn.classList.toggle('on', wantOn && !filmPlaying);
     soundBtn.setAttribute('aria-pressed', String(wantOn));
     soundBtn.setAttribute('aria-label', wantOn ? 'Mute music' : 'Play music');
-    soundLabel.textContent = wantOn ? (ducked ? 'Paused for film' : 'Sound on') : 'Sound off';
+    soundLabel.textContent = wantOn ? (filmPlaying ? 'Paused for film' : 'Sound on') : 'Sound off';
   }
   function load() {
     if (loading) return loading;
@@ -463,28 +486,16 @@ footer p { font-size: .9rem; color: var(--muted); }
         var AC = window.AudioContext || window.webkitAudioContext;
         ctx = new AC();
         master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-        var r = await fetch('assets/music.mp3');
+        var r = await fetch('assets/music-loop.mp3');
         var ab = await r.arrayBuffer();
-        buf = await new Promise(function (res, rej) { var p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+        var buf = await new Promise(function (res, rej) { var p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+        src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(master); src.start();
       } catch (e) {
-        ctx = null; buf = null;
-        fallback = new Audio('assets/music.mp3'); fallback.loop = true; fallback.volume = 0;
+        ctx = null;
+        fallback = new Audio('assets/music-loop.mp3'); fallback.loop = true; fallback.volume = 0;
       }
     })();
     return loading;
-  }
-  function scheduleOne(t) {
-    var s = ctx.createBufferSource(); s.buffer = buf;
-    var g = ctx.createGain(); s.connect(g); g.connect(master);
-    var end = t + buf.duration;
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + XF);
-    g.gain.setValueAtTime(1, end - XF); g.gain.linearRampToValueAtTime(0, end);
-    s.start(t); s.stop(end + 0.05);
-  }
-  function pump() {
-    if (!ctx || !buf) return;
-    if (nextAt < ctx.currentTime) nextAt = ctx.currentTime + 0.05;
-    while (nextAt < ctx.currentTime + 10) { scheduleOne(nextAt); nextAt += buf.duration - XF; }
   }
   function fadeTo(v, sec) {
     if (ctx && master) {
@@ -494,32 +505,42 @@ footer p { font-size: .9rem; color: var(--muted); }
       master.gain.linearRampToValueAtTime(v, now + sec);
     } else if (fallback) {
       var start = fallback.volume, t0 = performance.now();
+      if (v > 0 && fallback.paused) fallback.play().catch(function () {});
       (function step(t) { var k = Math.min(1, (t - t0) / (sec * 1000)); fallback.volume = start + (v - start) * k; if (k < 1) requestAnimationFrame(step); else if (v === 0) fallback.pause(); })(t0);
     }
   }
   async function musicOn() {
     wantOn = true; setUI();
+    if (ctx && ctx.state !== 'running') { try { await ctx.resume(); } catch (e) {} }
     await load();
     if (!wantOn) return;
-    if (ctx && buf) {
-      if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) {} }
-      if (!pumpTimer) { nextAt = ctx.currentTime + 0.05; pump(); pumpTimer = setInterval(pump, 2000); }
-      if (!ducked) fadeTo(VOL, 2);
-    } else if (fallback) {
-      if (!ducked) { try { await fallback.play(); fadeTo(VOL, 2); } catch (e) { wantOn = false; setUI(); } }
-    }
+    if (ctx && ctx.state !== 'running') { try { await ctx.resume(); } catch (e) {} }
+    fadeTo(target(), 2);
   }
   function musicOff() { wantOn = false; setUI(); fadeTo(0, 1.2); }
+  function refresh(sec) { setUI(); if (wantOn) fadeTo(target(), sec); }
+  document.addEventListener('visibilitychange', function () { if (ctx && !document.hidden && wantOn && ctx.state !== 'running') ctx.resume().catch(function () {}); });
 
   soundBtn.addEventListener('click', function () { wantOn ? musicOff() : musicOn(); });
   document.getElementById('begin').addEventListener('click', function () {
     musicOn();
     document.getElementById('private').scrollIntoView({ behavior: 'smooth' });
   });
-  video.addEventListener('play', function () { ducked = true; setUI(); if (wantOn) fadeTo(0, 0.8); });
-  function unduck() { ducked = false; setUI(); if (wantOn) { if (fallback && fallback.paused) { fallback.play().catch(function(){}); } fadeTo(VOL, 2); } }
-  video.addEventListener('pause', unduck);
-  video.addEventListener('ended', unduck);
+  video.addEventListener('play', function () { filmPlaying = true; if (!msg.paused) msg.pause(); refresh(0.8); });
+  video.addEventListener('pause', function () { filmPlaying = false; refresh(2); });
+  video.addEventListener('ended', function () { filmPlaying = false; refresh(2); });
+
+  /* ---------- Lucius message ---------- */
+  var msgBtn = document.getElementById('msgBtn'), msgBar = document.getElementById('msgBar'), msgTime = document.getElementById('msgTime');
+  function fmt(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+  msgBtn.addEventListener('click', function () {
+    if (msg.paused) { if (!video.paused) video.pause(); msg.play().catch(function () {}); } else { msg.pause(); }
+  });
+  msg.addEventListener('play', function () { msgPlaying = true; msgBtn.textContent = 'Pause message'; msgBtn.setAttribute('aria-pressed', 'true'); refresh(0.6); });
+  function msgStop() { msgPlaying = false; msgBtn.textContent = msg.ended ? 'Play again' : 'Resume message'; msgBtn.setAttribute('aria-pressed', 'false'); refresh(2); }
+  msg.addEventListener('pause', msgStop);
+  msg.addEventListener('ended', msgStop);
+  msg.addEventListener('timeupdate', function () { var d = msg.duration || 44; msgBar.style.width = (100 * msg.currentTime / d) + '%'; msgTime.textContent = fmt(msg.currentTime) + ' / ' + fmt(d); });
   setUI();
 
   /* ---------- Privacy toggle ---------- */
