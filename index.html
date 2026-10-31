@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Lefkowitz Private AI Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;500;600&family=Barlow:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+/* Layout: full-bleed dark bands in the practice's own palette (charcoal, champagne gold, blush), each with a centered 1120px inner column; interactive panels sit inside the bands. Single dark look by choice, matching lefkowitzmd.com. */
+:root {
+  --bg: #131417;
+  --bg-2: #1B1C20;
+  --panel: #222329;
+  --line: #34353C;
+  --text: #F3F1EC;
+  --muted: #A9A7A1;
+  --gold: #A5946F;
+  --gold-hi: #C9B88F;
+  --blush: #F6D2CD;
+  --sand: #E5E3DE;
+  --display: "Barlow Semi Condensed", "Gotham Narrow", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; } [hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+img, video { max-width: 100%; display: block; }
+a { color: var(--gold-hi); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 88px; }
+.band.alt { background: var(--bg-2); }
+.inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+.eyebrow { font-family: var(--display); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-weight: 300; font-size: clamp(2.6rem, 7vw, 4.8rem); line-height: 1.02; letter-spacing: 0.01em; text-transform: uppercase; }
+h2 { font-weight: 400; font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; text-transform: uppercase; letter-spacing: 0.02em; }
+h3 { font-weight: 500; font-size: 1.15rem; letter-spacing: 0.03em; }
+p { margin: 0; max-width: 64ch; }
+.lead { font-size: 1.15rem; color: var(--sand); }
+.muted { color: var(--muted); }
+.head { display: flex; flex-direction: column; gap: 14px; }
+
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 2px; border: 1px solid var(--gold); background: transparent; cursor: pointer; font-family: var(--display); font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.85rem; text-decoration: none; color: var(--text); transition: background .25s, color .25s; }
+.btn:hover { background: var(--gold); color: var(--bg); }
+.btn.solid { background: var(--gold); color: var(--bg); }
+.btn.solid:hover { background: var(--gold-hi); }
+
+/* Hero */
+.hero { position: relative; overflow: hidden; padding-block: 120px 96px; }
+.hero-bg { position: absolute; inset: 0; background: url("assets/lefkowitz-office-exterior-2026.jpg") center/cover no-repeat; transform: scale(1.04); animation: drift 30s ease-in-out infinite alternate; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(19,20,23,.94) 0%, rgba(19,20,23,.78) 45%, rgba(19,20,23,.35) 100%), linear-gradient(0deg, rgba(19,20,23,1) 0%, rgba(19,20,23,0) 40%); }
+@keyframes drift { from { transform: scale(1.04) translateX(0); } to { transform: scale(1.1) translateX(-2%); } }
+.hero .inner { position: relative; z-index: 1; gap: 28px; }
+.logo { width: 180px; height: auto; opacity: .95; }
+.hero .lead { max-width: 54ch; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.byline { font-size: 0.9rem; color: var(--muted); }
+.stats { display: flex; flex-wrap: wrap; gap: 36px; padding-top: 24px; border-top: 1px solid rgba(165,148,111,.35); max-width: 640px; }
+.stat strong { display: block; font-family: var(--display); font-weight: 300; font-size: 2.4rem; line-height: 1; color: var(--gold-hi); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.85rem; color: var(--muted); }
+
+/* Sound button */
+.sound { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; background: rgba(27,28,32,.92); border: 1px solid var(--line); cursor: pointer; backdrop-filter: blur(8px); font-family: var(--display); letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; width: 18px; }
+.bars i { flex: 1; background: var(--gold-hi); height: 30%; border-radius: 1px; }
+.sound.on .bars i { animation: eq 1s ease-in-out infinite; }
+.sound.on .bars i:nth-child(2) { animation-delay: .2s; } .sound.on .bars i:nth-child(3) { animation-delay: .4s; } .sound.on .bars i:nth-child(4) { animation-delay: .1s; }
+@keyframes eq { 0%,100% { height: 25%; } 50% { height: 100%; } }
+
+/* Split layouts */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.photo { position: relative; border-radius: 2px; overflow: hidden; aspect-ratio: 16/10; max-width: 100%; background: var(--panel); }
+.photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo figcaption { position: absolute; left: 0; bottom: 0; padding: 10px 14px; font-size: .78rem; color: var(--sand); background: linear-gradient(0deg, rgba(19,20,23,.85), rgba(19,20,23,0)); width: 100%; }
+
+/* Privacy toggle */
+.switch { display: inline-flex; border: 1px solid var(--line); border-radius: 2px; padding: 4px; gap: 4px; align-self: flex-start; flex-wrap: wrap; }
+.switch button { border: 0; background: transparent; padding: 10px 16px; cursor: pointer; font-family: var(--display); letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; color: var(--muted); border-radius: 2px; }
+.switch button[aria-pressed="true"] { background: var(--gold); color: var(--bg); }
+.flowmap { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.flowmap svg { width: 100%; height: auto; }
+.flowmap ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+.flowmap li { font-size: .95rem; padding-left: 18px; position: relative; color: var(--sand); }
+.flowmap li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--gold)); }
+.flowmap.cloud li { --dot: #C9786B; }
+
+/* Studio */
+.studio { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; }
+.topics { display: flex; flex-direction: column; gap: 8px; }
+.topics button { text-align: left; background: transparent; border: 1px solid var(--line); border-radius: 2px; padding: 14px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: border-color .2s, background .2s; }
+.topics button small { color: var(--muted); font-size: .8rem; }
+.topics button[aria-pressed="true"] { border-color: var(--gold); background: rgba(165,148,111,.1); }
+.topics button span { font-family: var(--display); font-weight: 500; letter-spacing: .04em; font-size: 1.05rem; }
+.stage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); }
+.tabs button { background: transparent; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; cursor: pointer; font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: .8rem; color: var(--muted); margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--gold); }
+.draft { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 24px; min-height: 360px; display: flex; flex-direction: column; gap: 14px; animation: rise .35s ease; }
+@keyframes rise { from { opacity: .4; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.draft .meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); }
+.draft .meta b { color: var(--gold-hi); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; font-family: var(--display); }
+.draft h4 { margin: 0; font-family: var(--display); font-weight: 500; font-size: 1.35rem; line-height: 1.2; }
+.draft p, .draft li { color: var(--sand); font-size: .98rem; }
+.draft ul, .draft ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.ig { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.ig img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 2px; }
+.tags { color: var(--gold-hi) !important; font-size: .9rem !important; }
+.approve { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+.approve .btn { padding: 10px 16px; font-size: .75rem; }
+.approve .status { font-size: .85rem; color: var(--muted); }
+.approve .status.ok { color: #9CCB9F; }
+.note { font-size: .82rem; color: var(--muted); }
+
+/* Multiplier */
+.multiply { display: grid; grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 2fr); gap: 20px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 24px; }
+.src { display: flex; gap: 14px; align-items: center; }
+.src .thumb { width: 72px; height: 72px; border-radius: 2px; overflow: hidden; flex: none; }
+.src .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.arrow { color: var(--gold); font-size: 1.6rem; }
+.outs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.out { border: 1px solid var(--line); border-radius: 2px; padding: 12px 10px; text-align: center; transition: border-color .3s, background .3s; }
+.out strong { display: block; font-family: var(--display); font-weight: 300; font-size: 2rem; line-height: 1; color: var(--gold-hi); font-variant-numeric: tabular-nums; }
+.out span { font-size: .78rem; color: var(--muted); }
+.out.lit { border-color: var(--gold); background: rgba(165,148,111,.12); }
+
+/* Week */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.day { border: 1px solid var(--line); border-radius: 2px; padding: 14px 12px; background: transparent; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 8px; min-height: 120px; transition: border-color .2s, background .2s; }
+.day[aria-pressed="true"] { border-color: var(--gold); background: rgba(165,148,111,.1); }
+.day .dn { font-family: var(--display); letter-spacing: .18em; text-transform: uppercase; font-size: .75rem; color: var(--gold); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font-size: .68rem; letter-spacing: .06em; padding: 3px 7px; border-radius: 999px; background: rgba(246,210,205,.12); color: var(--blush); white-space: nowrap; }
+.daydetail { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+.daydetail ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.daydetail li { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 14px; font-size: .95rem; color: var(--sand); }
+.daydetail li time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; padding-top: 1px; }
+
+/* Film */
+.film { position: relative; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; background: #000; aspect-ratio: 16/9; max-width: 100%; }
+.film video { width: 100%; height: 100%; object-fit: cover; }
+.built { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.built div { border-top: 1px solid var(--gold); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.built p { font-size: .95rem; color: var(--muted); }
+
+/* Journey */
+.journey { display: flex; flex-direction: column; gap: 20px; }
+.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; position: relative; }
+.steps::before { content: ""; position: absolute; left: 0; right: 0; top: 19px; height: 1px; background: var(--line); }
+.step { position: relative; background: transparent; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 0 8px 0 0; text-align: left; }
+.step .dot { width: 39px; height: 39px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; font-family: var(--display); font-size: .95rem; color: var(--muted); transition: all .25s; font-variant-numeric: tabular-nums; }
+.step .lbl { font-family: var(--display); letter-spacing: .1em; text-transform: uppercase; font-size: .8rem; color: var(--muted); }
+.step[aria-pressed="true"] .dot { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+.step[aria-pressed="true"] .lbl { color: var(--text); }
+.stepcard { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 28px; animation: rise .35s ease; }
+.stepcard h3 { font-size: 1.5rem; font-weight: 400; text-transform: uppercase; letter-spacing: .04em; }
+.stepcard ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--sand); }
+.stepcard .who { border-left: 1px solid var(--line); padding-left: 24px; display: flex; flex-direction: column; gap: 10px; }
+.stepcard .who p { font-size: .95rem; color: var(--muted); }
+
+/* Quote */
+.quote { font-family: var(--body); font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.75rem); line-height: 1.4; color: var(--text); max-width: 34ch; }
+.quote-by { font-family: var(--display); letter-spacing: .18em; text-transform: uppercase; font-size: .8rem; color: var(--gold); }
+.learn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; }
+.learn div { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.learn p { font-size: .95rem; color: var(--muted); }
+
+/* Phases */
+.phases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.phase { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.phase .n { font-family: var(--display); font-weight: 300; font-size: 3rem; line-height: 1; color: var(--gold-hi); font-variant-numeric: tabular-nums; }
+.phase .when { font-family: var(--display); letter-spacing: .16em; text-transform: uppercase; font-size: .75rem; color: var(--blush); }
+.phase p { font-size: .95rem; color: var(--muted); }
+
+.rules { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 32px; }
+.rules li { padding-left: 24px; position: relative; color: var(--sand); font-size: .98rem; }
+.rules li::before { content: ""; position: absolute; left: 0; top: .75em; width: 12px; height: 1px; background: var(--gold); }
+
+footer.band { padding-block: 56px 96px; border-top: 1px solid var(--line); }
+footer .inner { gap: 12px; }
+footer p { font-size: .9rem; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .split, .studio, .stepcard { grid-template-columns: minmax(0, 1fr); }
+  .stepcard .who { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 18px; }
+  .multiply { grid-template-columns: minmax(0, 1fr); }
+  .arrow { transform: rotate(90deg); justify-self: start; }
+  .outs { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
+  .week { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 20px; }
+  .steps::before { display: none; }
+  .phases, .built { grid-template-columns: minmax(0, 1fr); }
+  .topics { flex-direction: row; flex-wrap: wrap; }
+  .topics button { flex: 1 1 160px; }
+}
+@media (max-width: 600px) {
+  .band { padding-block: 64px; }
+  .hero { padding-block: 88px 72px; }
+  .ig { grid-template-columns: minmax(0, 1fr); }
+  .ig img { max-width: 260px; }
+  .flowmap ul, .learn, .rules { grid-template-columns: minmax(0, 1fr); }
+  .daydetail li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+</style>
+</head>
+<body>
+
+<button class="sound" id="sound" type="button" aria-pressed="false" aria-label="Play music">
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <span id="soundLabel">Sound off</span>
+</button>
+
+<!-- HERO -->
+<header class="band hero">
+  <div class="hero-bg" role="img" aria-label="The Lefkowitz Plastic Surgery building in West Columbia, South Carolina"></div>
+  <div class="inner">
+    <img class="logo" src="assets/logo-stacked-white.svg" alt="Lefkowitz Plastic Surgery and Aesthetics">
+    <span class="eyebrow">A proposal for Dr. Todd Lefkowitz</span>
+    <h1>Your private<br>AI studio</h1>
+    <p class="lead">One system, running on a computer inside your practice, that creates your marketing, follows up every lead, and handles the routine work around consults and recovery. Patient photos and records never leave the building.</p>
+    <div class="hero-actions">
+      <button class="btn solid" id="begin" type="button">Begin with sound</button>
+      <a class="btn" href="#film">Watch your promo film</a>
+    </div>
+    <div class="stats" aria-label="From lefkowitzmd.com">
+      <div class="stat"><strong>100+</strong><span>deep plane facelifts a year</span></div>
+      <div class="stat"><strong>150+</strong><span>aesthetic breast surgeries a year</span></div>
+      <div class="stat"><strong>1</strong><span>system to run the marketing</span></div>
+    </div>
+    <p class="byline">Prepared by Brad Valdes · October 2026</p>
+  </div>
+</header>
+
+<main>
+
+<!-- PRIVACY -->
+<section class="band" id="private">
+  <div class="inner">
+    <div class="split">
+      <div class="head">
+        <span class="eyebrow">Why private</span>
+        <h2>Your patients' photos stay in your building</h2>
+        <p class="lead">Most AI tools send what you give them to someone else's servers. This one runs on hardware you own, in your office.</p>
+        <p class="muted">That matters for HIPAA, for your patients' trust, and for the practice. What the system learns about your voice, your protocols and your patients belongs to you.</p>
+      </div>
+      <figure class="photo" style="margin:0">
+        <img src="assets/home-gallery-Space_001.jpg" alt="Interior of the Lefkowitz Plastic Surgery office" loading="lazy">
+        <figcaption>Your Quad A accredited facility, from lefkowitzmd.com</figcaption>
+      </figure>
+    </div>
+
+    <div class="switch" role="group" aria-label="Compare where data goes">
+      <button type="button" id="pvCloud" aria-pressed="false">Typical AI apps</button>
+      <button type="button" id="pvLocal" aria-pressed="true">Your private studio</button>
+    </div>
+    <div class="flowmap" id="flowmap">
+      <svg viewBox="0 0 720 150" aria-hidden="true">
+        <rect x="20" y="30" width="220" height="90" rx="2" fill="#2A2B31" stroke="#A5946F"/>
+        <text x="130" y="70" text-anchor="middle" fill="#F3F1EC" font-family="Barlow Semi Condensed, sans-serif" font-size="16" letter-spacing="2">YOUR PRACTICE</text>
+        <text x="130" y="94" text-anchor="middle" fill="#A9A7A1" font-family="Barlow, sans-serif" font-size="13">photos · notes · charts</text>
+        <g id="mapLocal">
+          <rect x="60" y="104" width="100" height="10" rx="1" fill="#A5946F"/>
+          <text x="400" y="70" text-anchor="middle" fill="#C9B88F" font-family="Barlow Semi Condensed, sans-serif" font-size="16" letter-spacing="2">STAYS HERE</text>
+          <text x="400" y="94" text-anchor="middle" fill="#A9A7A1" font-family="Barlow, sans-serif" font-size="13">AI computer in your office</text>
+          <path d="M250 75 H 300" stroke="#A5946F" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+          <rect x="305" y="40" width="190" height="70" rx="2" fill="none" stroke="#A5946F" stroke-dasharray="3 3"/>
+        </g>
+        <g id="mapCloud" style="display:none">
+          <path d="M250 75 C 380 75, 420 40, 520 45" stroke="#C9786B" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+          <path d="M250 85 C 380 85, 420 110, 520 110" stroke="#C9786B" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+          <rect x="525" y="25" width="170" height="40" rx="20" fill="none" stroke="#C9786B"/>
+          <text x="610" y="50" text-anchor="middle" fill="#F3F1EC" font-family="Barlow, sans-serif" font-size="13">Vendor servers</text>
+          <rect x="525" y="90" width="170" height="40" rx="20" fill="none" stroke="#C9786B"/>
+          <text x="610" y="115" text-anchor="middle" fill="#F3F1EC" font-family="Barlow, sans-serif" font-size="13">Another vendor</text>
+        </g>
+      </svg>
+      <ul id="pvList"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- STUDIO -->
+<section class="band alt" id="studio">
+  <div class="inner">
+    <div class="head">
+      <span class="eyebrow">Marketing engine</span>
+      <h2>A content team that never stops</h2>
+      <p class="lead">Social media, blog, email and video, drafted in your voice and posted on schedule. Pick a topic and a channel to see a sample draft.</p>
+    </div>
+    <div class="studio">
+      <div class="topics" id="topics" role="group" aria-label="Topic"></div>
+      <div class="stage">
+        <div class="tabs" id="tabs" role="tablist" aria-label="Channel"></div>
+        <div id="draftWrap"></div>
+        <p class="note">Sample drafts written from lefkowitzmd.com. The real system learns Dr. Lefkowitz's voice, and staff approve every piece before it posts.</p>
+      </div>
+    </div>
+
+    <div class="head" style="margin-top:24px">
+      <h3 style="font-size:1.4rem;font-weight:400;text-transform:uppercase;letter-spacing:.06em">One recording becomes a week of content</h3>
+    </div>
+    <div class="multiply">
+      <div class="src">
+        <div class="thumb"><img src="assets/lefkowitz-vertical-drtodd1.jpg" alt="Dr. Todd Lefkowitz" loading="lazy"></div>
+        <div>
+          <strong style="font-family:var(--display);font-weight:500;letter-spacing:.04em">20-minute Q&amp;A</strong>
+          <p class="muted" style="font-size:.9rem">Dr. Lefkowitz on facelift recovery</p>
+          <button class="btn" id="runMulti" type="button" style="margin-top:10px;padding:8px 14px;font-size:.72rem">Run it</button>
+        </div>
+      </div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="outs" id="outs">
+        <div class="out"><strong data-n="8">8</strong><span>captioned clips</span></div>
+        <div class="out"><strong data-n="1">1</strong><span>blog article</span></div>
+        <div class="out"><strong data-n="6">6</strong><span>social posts</span></div>
+        <div class="out"><strong data-n="1">1</strong><span>newsletter</span></div>
+        <div class="out"><strong data-n="3">3</strong><span>ad versions</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK -->
+<section class="band" id="week">
+  <div class="inner">
+    <div class="head">
+      <span class="eyebrow">Example week</span>
+      <h2>Your marketing, on autopilot</h2>
+      <p class="lead">Tap a day to see what goes out. You approve it all in a few minutes each morning.</p>
+    </div>
+    <div class="week" id="weekGrid" role="group" aria-label="Days of the week"></div>
+    <div class="daydetail" id="dayDetail"></div>
+  </div>
+</section>
+
+<!-- FILM -->
+<section class="band alt" id="film">
+  <div class="inner">
+    <div class="head">
+      <span class="eyebrow">Already built for you</span>
+      <h2>Your promo film</h2>
+      <p class="lead">Made from the real facility tour footage on your website, with narration and an original score. The music on this page comes from the same score.</p>
+    </div>
+    <div class="film">
+      <video id="promo" controls playsinline preload="metadata" poster="assets/promo-poster.jpg">
+        <source src="assets/promo.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="built">
+      <div><h3>Promo film</h3><p>46 seconds, 1080p, built from your own office footage. Ready for the website, social and ads.</p></div>
+      <div><h3>Original score</h3><p>Music composed for the film. It plays on this page when you turn the sound on.</p></div>
+      <div><h3>Practice app</h3><p>A mobile app built from lefkowitzmd.com: procedures, a before-and-after gallery with a compare slider, reviews and the out-of-state flow.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section class="band" id="journey">
+  <div class="inner">
+    <div class="head">
+      <span class="eyebrow">Patient pipeline</span>
+      <h2>Every step of the patient journey</h2>
+      <p class="lead">From first question to five-star review. Tap a step.</p>
+    </div>
+    <div class="journey">
+      <div class="steps" id="steps" role="group" aria-label="Journey steps"></div>
+      <div id="stepCard"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEARNS -->
+<section class="band alt" id="learns">
+  <div class="inner">
+    <div class="split">
+      <figure class="photo" style="margin:0;aspect-ratio:3/2">
+        <img src="assets/todd-and-christie-go-way-back.jpg" alt="Dr. Todd Lefkowitz and Lead Esthetician Christie Tull" loading="lazy">
+        <figcaption>Dr. Lefkowitz and Christie Tull, Lead Esthetician</figcaption>
+      </figure>
+      <div class="head">
+        <span class="eyebrow">It learns your practice</span>
+        <p class="quote">"Every question is pertinent. Every question is important. You deserve to have every question answered."</p>
+        <span class="quote-by">Dr. Todd Lefkowitz, lefkowitzmd.com</span>
+        <p class="muted">The system is built around that idea. It answers every question at any hour, remembers every conversation, and hands anything medical to your team.</p>
+      </div>
+    </div>
+    <div class="learn">
+      <div><h3>One memory across every channel</h3><p>Phone, text, email, the app and social media. Whoever picks up sees the full history.</p></div>
+      <div><h3>Your voice, your protocols</h3><p>It learns how you explain things and how your team works, then writes and answers the same way.</p></div>
+      <div><h3>Gets better every month</h3><p>It learns which posts, emails and follow-ups turn into booked consults, and does more of what works.</p></div>
+      <div><h3>Owned by the practice</h3><p>The model and everything it learns live on your hardware. Nothing is rented, and nothing leaves.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLLOUT -->
+<section class="band" id="rollout">
+  <div class="inner">
+    <div class="head">
+      <span class="eyebrow">How we'd roll it out</span>
+      <h2>Marketing first, then the patient side</h2>
+    </div>
+    <div class="phases">
+      <div class="phase"><span class="n">1</span><span class="when">First 30 days</span><h3>Marketing engine</h3><p>Social posting, blog, clips, email list and newsletter. It uses no patient records, so it can start right away and show results quickly.</p></div>
+      <div class="phase"><span class="n">2</span><span class="when">Days 30–60</span><h3>Patient pipeline</h3><p>Inquiry assistant, lead follow-up and travel coordination, once the HIPAA groundwork is in place.</p></div>
+      <div class="phase"><span class="n">3</span><span class="when">Days 60–90</span><h3>Consults &amp; recovery</h3><p>Photo library, consult notes, prep briefs and post-op check-ins, tested with staff before patients see them.</p></div>
+    </div>
+
+    <div class="head" style="margin-top:32px">
+      <span class="eyebrow">The rules it runs by</span>
+    </div>
+    <ul class="rules">
+      <li>Nothing publishes without approval from you or your staff.</li>
+      <li>Every post and ad follows medical-board, FTC and platform advertising rules.</li>
+      <li>Patient photos and stories are used only with written consent.</li>
+      <li>AI-generated images are never presented as real results.</li>
+      <li>It never gives medical advice or diagnoses. Clinical questions go to a person.</li>
+      <li>HIPAA groundwork before any patient data goes in: encryption, access logs and a compliance review.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="band">
+  <div class="inner">
+    <span class="eyebrow">Ready when you are</span>
+    <p style="font-size:1.05rem;color:var(--sand)">Prepared for Dr. Todd Lefkowitz by Brad Valdes. Let's walk through the film and the app together and start Phase 1.</p>
+    <p>Photos, facility footage and practice details are from lefkowitzmd.com. Sample drafts are illustrations and have not been published.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  /* ---------- Music: seamless crossfaded loop of the promo score ---------- */
+  var soundBtn = document.getElementById('sound');
+  var soundLabel = document.getElementById('soundLabel');
+  var video = document.getElementById('promo');
+  var VOL = 0.55, XF = 6;
+  var ctx = null, master = null, buf = null, nextAt = 0, pumpTimer = null, loading = null;
+  var fallback = null, wantOn = false, ducked = false;
+
+  function setUI() {
+    var on = wantOn && !ducked;
+    soundBtn.classList.toggle('on', on);
+    soundBtn.setAttribute('aria-pressed', String(wantOn));
+    soundBtn.setAttribute('aria-label', wantOn ? 'Mute music' : 'Play music');
+    soundLabel.textContent = wantOn ? (ducked ? 'Paused for film' : 'Sound on') : 'Sound off';
+  }
+  function load() {
+    if (loading) return loading;
+    loading = (async function () {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        ctx = new AC();
+        master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+        var r = await fetch('assets/music.mp3');
+        var ab = await r.arrayBuffer();
+        buf = await new Promise(function (res, rej) { var p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+      } catch (e) {
+        ctx = null; buf = null;
+        fallback = new Audio('assets/music.mp3'); fallback.loop = true; fallback.volume = 0;
+      }
+    })();
+    return loading;
+  }
+  function scheduleOne(t) {
+    var s = ctx.createBufferSource(); s.buffer = buf;
+    var g = ctx.createGain(); s.connect(g); g.connect(master);
+    var end = t + buf.duration;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + XF);
+    g.gain.setValueAtTime(1, end - XF); g.gain.linearRampToValueAtTime(0, end);
+    s.start(t); s.stop(end + 0.05);
+  }
+  function pump() {
+    if (!ctx || !buf) return;
+    if (nextAt < ctx.currentTime) nextAt = ctx.currentTime + 0.05;
+    while (nextAt < ctx.currentTime + 10) { scheduleOne(nextAt); nextAt += buf.duration - XF; }
+  }
+  function fadeTo(v, sec) {
+    if (ctx && master) {
+      var now = ctx.currentTime;
+      master.gain.cancelScheduledValues(now);
+      master.gain.setValueAtTime(master.gain.value, now);
+      master.gain.linearRampToValueAtTime(v, now + sec);
+    } else if (fallback) {
+      var start = fallback.volume, t0 = performance.now();
+      (function step(t) { var k = Math.min(1, (t - t0) / (sec * 1000)); fallback.volume = start + (v - start) * k; if (k < 1) requestAnimationFrame(step); else if (v === 0) fallback.pause(); })(t0);
+    }
+  }
+  async function musicOn() {
+    wantOn = true; setUI();
+    await load();
+    if (!wantOn) return;
+    if (ctx && buf) {
+      if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) {} }
+      if (!pumpTimer) { nextAt = ctx.currentTime + 0.05; pump(); pumpTimer = setInterval(pump, 2000); }
+      if (!ducked) fadeTo(VOL, 2);
+    } else if (fallback) {
+      if (!ducked) { try { await fallback.play(); fadeTo(VOL, 2); } catch (e) { wantOn = false; setUI(); } }
+    }
+  }
+  function musicOff() { wantOn = false; setUI(); fadeTo(0, 1.2); }
+
+  soundBtn.addEventListener('click', function () { wantOn ? musicOff() : musicOn(); });
+  document.getElementById('begin').addEventListener('click', function () {
+    musicOn();
+    document.getElementById('private').scrollIntoView({ behavior: 'smooth' });
+  });
+  video.addEventListener('play', function () { ducked = true; setUI(); if (wantOn) fadeTo(0, 0.8); });
+  function unduck() { ducked = false; setUI(); if (wantOn) { if (fallback && fallback.paused) { fallback.play().catch(function(){}); } fadeTo(VOL, 2); } }
+  video.addEventListener('pause', unduck);
+  video.addEventListener('ended', unduck);
+  setUI();
+
+  /* ---------- Privacy toggle ---------- */
+  var PV = {
+    local: ['Photos and records stay on a computer in your office', 'Your rules, your access logs', 'The AI learns only for your practice', 'One system instead of a stack of subscriptions'],
+    cloud: ['Photos are uploaded to outside servers', 'Data is kept under the vendor\'s terms', 'Each tool is a separate company to vet', 'A separate monthly fee for each tool']
+  };
+  var pvC = document.getElementById('pvCloud'), pvL = document.getElementById('pvLocal');
+  function pv(mode) {
+    pvC.setAttribute('aria-pressed', String(mode === 'cloud'));
+    pvL.setAttribute('aria-pressed', String(mode === 'local'));
+    document.getElementById('mapLocal').style.display = mode === 'local' ? '' : 'none';
+    document.getElementById('mapCloud').style.display = mode === 'cloud' ? '' : 'none';
+    document.getElementById('flowmap').classList.toggle('cloud', mode === 'cloud');
+    document.getElementById('pvList').innerHTML = PV[mode].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+  }
+  pvC.addEventListener('click', function () { pv('cloud'); });
+  pvL.addEventListener('click', function () { pv('local'); });
+  pv('local');
+
+  /* ---------- Content studio ---------- */
+  var TOPICS = [
+    { id: 'face', name: 'Deep plane facelift', sub: 'Facial rejuvenation', img: 'assets/lefkowitz-vertical-drtodd1.jpg' },
+    { id: 'breast', name: 'Breast surgery', sub: 'Augmentation, lift, reduction', img: 'assets/lefkowitz-vertical-drtodd3.jpg' },
+    { id: 'skin', name: 'Esthetics', sub: 'Christie and the skin team', img: 'assets/home-gallery-christie.jpg' },
+    { id: 'travel', name: 'Out-of-state patients', sub: 'Travel to Columbia, SC', img: 'assets/lefkowitz-office-exterior-2026.jpg' }
+  ];
+  var CHANNELS = [
+    { id: 'ig', name: 'Instagram' }, { id: 'blog', name: 'Blog' }, { id: 'email', name: 'Email' }, { id: 'video', name: 'Short video' }
+  ];
+  var D = {
+    face: {
+      ig: { when: 'Tue 7:30 PM', caption: 'Natural results don\'t happen by accident. Dr. Lefkowitz performs more than 100 deep plane facelifts and necklifts a year, using techniques he has refined since 2018. Every plan starts with a conversation about what you want.', cta: 'Request your consultation · 803-681-LIFT', tags: '#deepplanefacelift #necklift #columbiasc #facialrejuvenation #goconfidently' },
+      blog: { when: 'Publishes Mon 9:00 AM', title: 'Deep Plane Facelift Recovery: What to Expect, Week by Week', intro: 'Thinking about a deep plane facelift? Here is how recovery usually unfolds, and how our team supports you at every step.', list: ['The first few days, and our overnight recovery suite', 'When most patients feel ready to go out again, and why it varies', 'How our team checks in on you after surgery', 'Questions to bring to your consultation'] },
+      email: { when: 'Thu 10:00 AM · Face segment', subject: 'Your facelift questions, answered', preview: 'Dr. Lefkowitz on why every question matters', body: 'Most people considering a facelift have the same few questions: will it look natural, how long is recovery, and is the deep plane technique right for me? Dr. Lefkowitz answers each one in this month\'s video.', cta: 'Watch the video' },
+      video: { when: 'Wed 6:00 PM · Reels, TikTok, Shorts', title: '"Why some facelifts look pulled" · 30 seconds', list: ['0–3 s · Hook on screen: "Why do some facelifts look pulled?"', '3–22 s · Dr. Lefkowitz explains, in his own words, how a deep plane facelift differs from a skin-only lift', '22–27 s · B-roll from your real surgical center tour', '27–30 s · Logo, 803-681-LIFT, "Go Confidently"'] }
+    },
+    breast: {
+      ig: { when: 'Mon 12:15 PM', caption: 'More than 150 aesthetic breast surgeries a year. Augmentation, lift, reduction and revision, each one planned around your goals and your body. Every question you have deserves a full answer.', cta: 'Book your consultation · link in bio', tags: '#breastaugmentation #breastlift #breastreduction #columbiasc #plasticsurgery' },
+      blog: { when: 'Publishes Mon 9:00 AM', title: 'Augmentation or Augmentation-Mastopexy: Which Is Right for You?', intro: 'Implants alone, or implants with a lift? The answer depends on your goals and your anatomy. Here\'s how Dr. Lefkowitz helps patients decide.', list: ['What each procedure does', 'Signs a lift might be part of your plan', 'What recovery looks like for each', 'How to prepare for your consultation'] },
+      email: { when: 'Thu 10:00 AM · Breast segment', subject: 'Considering a breast reduction?', preview: 'What the process looks like, start to finish', body: 'Thinking about a breast reduction? Here\'s what the process looks like with our team, from consultation to recovery, and the financing options through Cherry and PatientFi.', cta: 'Request a consultation' },
+      video: { when: 'Sat 11:00 AM · Reels, TikTok, Shorts', title: '"3 questions to ask at your breast consultation" · 25 seconds', list: ['0–3 s · Hook: "Ask these 3 things before breast surgery"', '3–20 s · Dr. Lefkowitz answers each, captions on screen', '20–25 s · Office B-roll and consultation call to action'] }
+    },
+    skin: {
+      ig: { when: 'Fri 9:00 AM', caption: 'Meet Christie Tull, our Lead Esthetician. 17+ years in skin care and a licensed esthetic instructor. As Dr. Lefkowitz says, "My work can only be as good as the quality of your skin."', cta: 'Book a skin consultation with Christie', tags: '#esthetician #moxi #microneedling #chemicalpeel #columbiasc' },
+      blog: { when: 'Publishes Mon 9:00 AM', title: 'Moxi, BBL or Microneedling? A Guide to Our Esthetic Treatments', intro: 'Our esthetics team offers a full menu of skin treatments. Here\'s what each one does and how Christie helps you choose.', list: ['Moxi and BBL broadband light: what they treat', 'Microneedling and microdermabrasion', 'Esthetic chemical peels', 'Why skin care before surgery improves results'] },
+      email: { when: 'Thu 10:00 AM · Skin segment', subject: 'Your skin, ready for the season', preview: 'Christie\'s picks for this month', body: 'The weather is changing, and so are your skin\'s needs. Christie shares the treatments she recommends this time of year and how to pair them with your home routine.', cta: 'Book with Christie' },
+      video: { when: 'Sun 7:00 PM · Reels, TikTok, Shorts', title: '"These two go way back" · 20 seconds', list: ['0–4 s · Todd and Christie on camera: "We grew up together"', '4–15 s · They explain how esthetics and surgery work together', '15–20 s · "Esthetics and plastic surgery, all under one roof"'] }
+    },
+    travel: {
+      ig: { when: 'Wed 1:00 PM', caption: 'Flying in for your facelift? Many patients travel to Columbia, SC for facial rejuvenation. We plan the details with you: consult, surgery, recovery and the trip home.', cta: 'See our travel information', tags: '#plasticsurgerytravel #deepplanefacelift #columbiasc #goconfidently' },
+      blog: { when: 'Publishes Mon 9:00 AM', title: 'Traveling to Columbia, SC for Facial Rejuvenation: A Planning Guide', intro: 'Everything out-of-state patients need to plan a smooth trip, from the first consultation to the day you fly home.', list: ['How consultations work when you live out of state', 'How long to plan to stay', 'Where to stay nearby', 'Follow-up care once you\'re home'] },
+      email: { when: 'Automatic · after an out-of-state inquiry', subject: 'Your trip to Columbia, planned', preview: 'Step 1 of 4: your consultation', body: 'Thank you for reaching out from out of state. Here\'s how our travel process works, starting with your consultation. Your coordinator will follow up with dates and local accommodations.', cta: 'Plan my consultation' },
+      video: { when: 'Tue 5:00 PM · Reels, TikTok, Shorts', title: '"Tour our Quad A surgical center" · 30 seconds', list: ['0–3 s · Drone shot of the building', '3–24 s · Lobby, treatment room, operating room and overnight recovery suite, from your real tour footage', '24–30 s · "Travel with confidence" and travel info link'] }
+    }
+  };
+  var curTopic = 'face', curCh = 'ig';
+  var topicsEl = document.getElementById('topics'), tabsEl = document.getElementById('tabs'), wrap = document.getElementById('draftWrap');
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  topicsEl.innerHTML = TOPICS.map(function (t) { return '<button type="button" data-t="' + t.id + '"><span>' + t.name + '</span><small>' + t.sub + '</small></button>'; }).join('');
+  tabsEl.innerHTML = CHANNELS.map(function (c) { return '<button type="button" role="tab" data-c="' + c.id + '">' + c.name + '</button>'; }).join('');
+  function renderDraft() {
+    topicsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.t === curTopic)); });
+    tabsEl.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.c === curCh)); });
+    var t = TOPICS.filter(function (x) { return x.id === curTopic; })[0];
+    var d = D[curTopic][curCh];
+    var label = CHANNELS.filter(function (x) { return x.id === curCh; })[0].name;
+    var body = '';
+    if (curCh === 'ig') {
+      body = '<div class="ig"><img src="' + t.img + '" alt=""><div style="display:flex;flex-direction:column;gap:12px;min-width:0"><p>' + esc(d.caption) + '</p><p><strong>' + esc(d.cta) + '</strong></p><p class="tags">' + esc(d.tags) + '</p></div></div>';
+    } else if (curCh === 'blog') {
+      body = '<h4>' + esc(d.title) + '</h4><p>' + esc(d.intro) + '</p><ul>' + d.list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    } else if (curCh === 'email') {
+      body = '<p class="muted" style="font-size:.85rem">Subject</p><h4>' + esc(d.subject) + '</h4><p class="muted" style="font-size:.9rem">' + esc(d.preview) + '</p><p>' + esc(d.body) + '</p><p><span class="btn" style="padding:8px 14px;font-size:.72rem;cursor:default">' + esc(d.cta) + '</span></p>';
+    } else {
+      body = '<h4>' + esc(d.title) + '</h4><ol>' + d.list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>';
+    }
+    wrap.innerHTML = '<article class="draft" role="tabpanel"><div class="meta"><b>' + label + ' draft</b><span>Scheduled ' + esc(d.when) + '</span></div>' + body +
+      '<div class="approve"><button class="btn solid" type="button" id="approveBtn">Approve</button><button class="btn" type="button" id="editBtn">Request changes</button><span class="status" id="approveStatus">Waiting for approval</span></div></article>';
+    document.getElementById('approveBtn').addEventListener('click', function () { var s = document.getElementById('approveStatus'); s.textContent = 'Approved · scheduled for ' + d.when + ' (demo)'; s.className = 'status ok'; });
+    document.getElementById('editBtn').addEventListener('click', function () { var s = document.getElementById('approveStatus'); s.textContent = 'Sent back with your notes for a new draft (demo)'; s.className = 'status'; });
+  }
+  topicsEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; curTopic = b.dataset.t; renderDraft(); });
+  tabsEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; curCh = b.dataset.c; renderDraft(); });
+  renderDraft();
+
+  /* ---------- Multiplier ---------- */
+  document.getElementById('runMulti').addEventListener('click', function () {
+    var outs = document.querySelectorAll('#outs .out');
+    outs.forEach(function (o) { o.classList.remove('lit'); o.querySelector('strong').textContent = '0'; });
+    outs.forEach(function (o, i) {
+      setTimeout(function () {
+        var el = o.querySelector('strong'), n = +el.dataset.n, k = 0;
+        var iv = setInterval(function () { k++; el.textContent = String(k); if (k >= n) { clearInterval(iv); o.classList.add('lit'); } }, 90);
+      }, 350 * i);
+    });
+  });
+
+  /* ---------- Week ---------- */
+  var WEEK = [
+    { d: 'Mon', chips: ['Blog', 'Instagram'], items: [['9:00 AM', 'Blog article publishes: "Deep Plane Facelift Recovery, Week by Week"'], ['12:15 PM', 'Instagram post: breast surgery'], ['All day', 'Comment and DM replies drafted for staff']] },
+    { d: 'Tue', chips: ['Instagram', 'Clip'], items: [['7:30 PM', 'Instagram post: deep plane facelift'], ['5:00 PM', 'Short video: tour of the surgical center']] },
+    { d: 'Wed', chips: ['Clip', 'Ads'], items: [['6:00 PM', 'Short video: "Why some facelifts look pulled"'], ['Morning', 'Three new ad versions start testing against last week\'s winner']] },
+    { d: 'Thu', chips: ['Email'], items: [['10:00 AM', 'Newsletter to the Face list: "Your facelift questions, answered"'], ['10:00 AM', 'Breast and Skin lists get their own versions']] },
+    { d: 'Fri', chips: ['Instagram', 'Reviews'], items: [['9:00 AM', 'Instagram post: meet Christie'], ['Afternoon', 'Review requests sent to patients at the right point in recovery'], ['Afternoon', 'Google and RealSelf replies drafted']] },
+    { d: 'Sat', chips: ['Clip'], items: [['11:00 AM', 'Short video: "3 questions to ask at your breast consultation"']] },
+    { d: 'Sun', chips: ['Report'], items: [['7:00 PM', 'Short video: "These two go way back"'], ['8:00 PM', 'Weekly report to Dr. Lefkowitz: what was posted, what was opened, and which pieces led to booked consults']] }
+  ];
+  var curDay = 0, wg = document.getElementById('weekGrid'), dd = document.getElementById('dayDetail');
+  wg.innerHTML = WEEK.map(function (w, i) { return '<button type="button" class="day" data-i="' + i + '"><span class="dn">' + w.d + '</span><span class="chips">' + w.chips.map(function (c) { return '<span class="chip">' + c + '</span>'; }).join('') + '</span></button>'; }).join('');
+  function renderDay() {
+    wg.querySelectorAll('.day').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.i === curDay)); });
+    var w = WEEK[curDay];
+    dd.innerHTML = '<span class="eyebrow">' + w.d + '</span><ul>' + w.items.map(function (it) { return '<li><time>' + it[0] + '</time><span>' + esc(it[1]) + '</span></li>'; }).join('') + '</ul>';
+  }
+  wg.addEventListener('click', function (e) { var b = e.target.closest('.day'); if (!b) return; curDay = +b.dataset.i; renderDay(); });
+  renderDay();
+
+  /* ---------- Journey ---------- */
+  var STEPS = [
+    { n: 'Inquiry', ai: ['Answers questions on the website and app at any hour, in seconds', 'Covers procedures, recovery times, price ranges and financing', 'Books the consultation and logs the lead'], who: 'Staff see a summary of every conversation. Medical questions go straight to them.' },
+    { n: 'Consult', ai: ['A one-page prep brief before each consult', 'With consent, records the consult and drafts the chart note', 'Sorts photos by procedure, date and standard view: frontal, oblique, lateral'], who: 'Dr. Lefkowitz reviews and signs every note. The system never decides anything clinical.' },
+    { n: 'Decision', ai: ['Personal follow-ups for people who haven\'t booked yet', 'Shares financing options through Cherry and PatientFi', 'Plans travel for out-of-state patients'], who: 'Staff approve every follow-up before it sends.' },
+    { n: 'Pre-op', ai: ['Pre-fills intake forms and flags missing history or medications', 'Sends reminders and instructions on schedule', 'Answers logistics questions'], who: 'Nurses get a checklist of anything incomplete.' },
+    { n: 'Recovery', ai: ['Daily check-ins from post-op day 1 to day 14', 'Patients send a photo and how they feel', 'Anything concerning goes to the nurse right away'], who: 'It never diagnoses. A person handles every clinical concern.' },
+    { n: 'Results', ai: ['Asks for a review at the right moment', 'Collects consent for testimonials and photos', 'Adds the patient to the right newsletter list'], who: 'Nothing is shared publicly without written consent.' }
+  ];
+  var curStep = 0, stepsEl = document.getElementById('steps'), card = document.getElementById('stepCard');
+  stepsEl.innerHTML = STEPS.map(function (s, i) { return '<button type="button" class="step" data-i="' + i + '"><span class="dot">' + (i + 1) + '</span><span class="lbl">' + s.n + '</span></button>'; }).join('');
+  function renderStep() {
+    stepsEl.querySelectorAll('.step').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.i === curStep)); });
+    var s = STEPS[curStep];
+    card.innerHTML = '<div class="stepcard"><div style="display:flex;flex-direction:column;gap:14px"><span class="eyebrow">Step ' + (curStep + 1) + ' of 6</span><h3>' + s.n + '</h3><ul>' + s.ai.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div><div class="who"><span class="eyebrow">Who stays in charge</span><p>' + esc(s.who) + '</p></div></div>';
+  }
+  stepsEl.addEventListener('click', function (e) { var b = e.target.closest('.step'); if (!b) return; curStep = +b.dataset.i; renderStep(); });
+  renderStep();
+})();
+</script>
+</body>
+</html>
