@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Your Agent Setup Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;500;600&family=Barlow:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: a single checklist column (max 860px). Sticky progress bar on top; each phase is a band of numbered, checkable steps. Dark brand look matching lefkowitzmd.com. */
+:root {
+  --bg: #131417; --bg-2: #1B1C20; --panel: #222329; --line: #34353C;
+  --text: #F3F1EC; --muted: #A9A7A1; --gold: #A5946F; --gold-hi: #C9B88F; --blush: #F6D2CD; --sand: #E5E3DE;
+  --ok: #9CCB9F; --warn: #E7B97A;
+  --display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; padding-top: env(safe-area-inset-top, 0px); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+a { color: var(--gold-hi); }
+:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.top { position: sticky; top: 0; z-index: 10; background: rgba(19,20,23,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; padding-block: 12px; }
+.top .t { font-family: var(--display); letter-spacing: .16em; text-transform: uppercase; font-size: .78rem; color: var(--gold); white-space: nowrap; }
+.prog { flex: 1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.prog div { height: 100%; width: 0; background: var(--gold-hi); transition: width .3s; }
+.pct { font-variant-numeric: tabular-nums; font-size: .85rem; color: var(--muted); min-width: 64px; text-align: right; }
+
+header .wrap { padding-block: 64px 40px; display: flex; flex-direction: column; gap: 18px; }
+.eyebrow { font-family: var(--display); font-size: .78rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-weight: 300; font-size: clamp(2.3rem, 6.5vw, 3.8rem); line-height: 1.04; text-transform: uppercase; }
+h2 { font-weight: 400; font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.1; text-transform: uppercase; letter-spacing: .02em; }
+h3 { font-weight: 500; font-size: 1.15rem; letter-spacing: .02em; }
+p { margin: 0; max-width: 66ch; }
+.lead { font-size: 1.12rem; color: var(--sand); }
+.muted { color: var(--muted); }
+
+.need { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
+.need li { padding-left: 20px; position: relative; color: var(--sand); }
+.need li::before { content: ""; position: absolute; left: 0; top: .72em; width: 10px; height: 1px; background: var(--gold); }
+
+.map { display: flex; flex-wrap: wrap; gap: 8px; }
+.map a { text-decoration: none; font-family: var(--display); letter-spacing: .08em; font-size: .85rem; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--sand); }
+.map a.done { border-color: var(--ok); color: var(--ok); }
+
+section.phase { border-top: 1px solid var(--line); }
+section.phase:nth-of-type(even) { background: var(--bg-2); }
+section.phase .wrap { padding-block: 56px; display: flex; flex-direction: column; gap: 22px; }
+.phase-head { display: flex; flex-direction: column; gap: 8px; }
+.phase-head .meta { font-size: .9rem; color: var(--muted); }
+
+.step { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); transition: border-color .2s, opacity .2s; }
+.step.done { border-color: rgba(156,203,159,.55); }
+.step.done .body > :not(.row) { opacity: .62; }
+.check { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold); background: transparent; color: var(--bg); cursor: pointer; display: grid; place-items: center; font-family: var(--display); font-size: .95rem; padding: 0; }
+.check span { color: var(--gold-hi); font-variant-numeric: tabular-nums; }
+.step.done .check { background: var(--ok); border-color: var(--ok); }
+.step.done .check span { color: var(--bg); }
+.body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.body p, .body li { color: var(--sand); font-size: .98rem; }
+.body ol, .body ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.path { font-family: var(--display); letter-spacing: .03em; color: var(--text); background: rgba(165,148,111,.14); padding: 1px 6px; border-radius: 2px; white-space: normal; }
+.cmd { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 2px; background: #0E0F12; min-width: 0; }
+.cmd code { flex: 1; min-width: 0; overflow-x: auto; padding: 10px 12px; font-family: var(--mono); font-size: .86rem; color: #E9E4D6; white-space: pre; }
+.cmd button { flex: none; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--gold-hi); cursor: pointer; padding: 0 14px; font-family: var(--display); letter-spacing: .12em; text-transform: uppercase; font-size: .72rem; }
+.see { font-size: .9rem !important; color: var(--muted) !important; }
+.see b { color: var(--ok); font-weight: 500; }
+.src { font-size: .8rem !important; color: var(--muted) !important; }
+.src a { color: var(--muted); }
+.callout { border-left: 2px solid var(--warn); background: rgba(231,185,122,.08); padding: 12px 14px; border-radius: 0 2px 2px 0; }
+.callout p { color: var(--sand); font-size: .95rem; }
+.callout b { color: var(--warn); font-weight: 500; }
+.brad { border-left-color: var(--gold); background: rgba(165,148,111,.1); }
+.brad b { color: var(--gold-hi); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.tablewrap { overflow-x: auto; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--sand); }
+th { font-family: var(--display); letter-spacing: .1em; text-transform: uppercase; font-size: .75rem; color: var(--gold); font-weight: 500; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+footer .wrap { padding-block: 48px 80px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+footer p { font-size: .9rem; color: var(--muted); }
+.reset { align-self: flex-start; background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 8px 14px; border-radius: 2px; cursor: pointer; font-family: var(--display); letter-spacing: .12em; text-transform: uppercase; font-size: .72rem; }
+
+@media (max-width: 600px) {
+  .need { grid-template-columns: minmax(0, 1fr); }
+  .step { grid-template-columns: minmax(0, 1fr); }
+  .top .t { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <span class="t">Your agent setup</span>
+  <div class="prog" aria-hidden="true"><div id="bar"></div></div>
+  <span class="pct" id="pct">0 of 0</span>
+</div></div>
+
+<header><div class="wrap">
+  <span class="eyebrow">For Dr. Todd Lefkowitz · prepared by Brad Valdes and Lucius</span>
+  <h1>From a new Mac Studio to your own AI agent</h1>
+  <p class="lead">A step-by-step checklist, in order. Tap the circle next to each step when it's done; this page remembers your progress on this device. Steps marked <b style="color:var(--gold-hi);font-weight:500">Brad does this with you</b> are the technical ones we'll do together.</p>
+  <div class="callout brad"><p><b>The plan:</b> by the end, your Mac Studio runs your own private AI assistant 24/7. You message it from your phone like a person, it remembers what matters, and the private version runs entirely on your own hardware.</p></div>
+  <h3 style="margin-top:8px">What you'll need</h3>
+  <ul class="need">
+    <li>Your Mac Studio, plugged in, with internet</li>
+    <li>Your Apple Account (Apple ID) and password</li>
+    <li>Your iPhone</li>
+    <li>An external drive for backups (1 TB or larger)</li>
+    <li>About 2 hours, split over two sessions</li>
+    <li>Ideally a battery backup (UPS) for the Mac</li>
+  </ul>
+  <nav class="map" id="map" aria-label="Phases"></nav>
+</div></header>
+
+<main id="phases">
+
+<section class="phase" id="p1" data-title="1 · Mac"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 1 · about 30 minutes · you can do this alone</span><h2>Set up the Mac</h2>
+  <p class="phase-head meta">Get the Mac safe, updated and ready to stay on around the clock.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>1</span></button><div class="body">
+    <h3>Turn it on and run the Setup Assistant</h3>
+    <p>Follow the on-screen steps. Sign in with your Apple Account when asked, and create your Mac user account with a strong password you'll remember.</p>
+    <p class="see">Done when you see <b>the desktop</b>.</p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>2</span></button><div class="body">
+    <h3>Turn on FileVault (disk encryption)</h3>
+    <p>Go to <span class="path">Apple menu  › System Settings › Privacy &amp; Security › FileVault</span> and turn it on.</p>
+    <p>When it asks how to unlock, choose <span class="path">Create a recovery key and do not use my iCloud account</span>. Write the key down and store it somewhere safe, away from the Mac.</p>
+    <div class="callout"><p><b>Good to know:</b> with FileVault on, after a power outage the Mac waits for your password before the assistant restarts. A battery backup (UPS) prevents most of those restarts. We recommend keeping FileVault on, because your assistant will hold private information.</p></div>
+    <p class="src">Source: <a href="https://support.apple.com/guide/mac-help/mh11785/mac" target="_blank" rel="noopener">Apple · Protect data with FileVault</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>3</span></button><div class="body">
+    <h3>Install every update</h3>
+    <p>Go to <span class="path">System Settings › General › Software Update</span> and install anything waiting. Then tap the <span class="path">ⓘ</span> next to Automatic Updates and turn on all three:</p>
+    <ul><li>Download new updates when available</li><li>Install macOS updates</li><li>Install Security Responses and system files</li></ul>
+    <p class="src">Source: <a href="https://support.apple.com/guide/mac-help/mchlpx1065/mac" target="_blank" rel="noopener">Apple · Keep your Mac up to date</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>4</span></button><div class="body">
+    <h3>Keep it awake, and have it restart after a power cut</h3>
+    <p>Go to <span class="path">System Settings › Energy</span> and turn on:</p>
+    <ul><li><span class="path">Prevent automatic sleeping when the display is off</span></li><li><span class="path">Wake for network access</span></li><li><span class="path">Start up when power is connected</span>: set to <b style="font-weight:500">Always</b> (if you see this option)</li></ul>
+    <p class="src">Sources: <a href="https://support.apple.com/guide/mac-help/mchle41a6ccd/mac" target="_blank" rel="noopener">Apple · Energy settings</a> · <a href="https://support.apple.com/125517" target="_blank" rel="noopener">Apple · Start up when power is connected</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>5</span></button><div class="body">
+    <h3>Set up Time Machine backups</h3>
+    <p>Plug in the external drive. Click the Time Machine icon in the menu bar, then <span class="path">Open Time Machine Settings › Add Backup Disk</span>, and pick the drive. Turn on encryption for the backup when offered.</p>
+    <p class="see">No icon? Go to <span class="path">System Settings › Control Center › Time Machine › Show in Menu Bar</span>.</p>
+    <p class="src">Source: <a href="https://support.apple.com/guide/mac-help/mh35860/mac" target="_blank" rel="noopener">Apple · Back up with Time Machine</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>6</span></button><div class="body">
+    <h3>Check how much memory your Mac has</h3>
+    <p>Go to <span class="path">Apple menu  › About This Mac</span> and note the <b style="font-weight:500">Memory</b> number (for example 64 GB or 128 GB). Text it to Brad. It decides which private AI model your Mac can run.</p>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p2" data-title="2 · Tools"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 2 · about 20 minutes · Brad does this with you</span><h2>Install the private AI engine</h2>
+  <p class="meta muted">This is the part that keeps patient information on your Mac. It runs AI models directly on your Mac Studio, with nothing sent to an outside company.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>7</span></button><div class="body">
+    <h3>Install Ollama (runs AI models on your Mac)</h3>
+    <ol><li>Download Ollama for macOS from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a>.</li><li>Open the download and drag <b style="font-weight:500">Ollama</b> into Applications.</li><li>Open it once and allow it to install its command-line tool when asked.</li></ol>
+    <p class="src">Source: <a href="https://docs.ollama.com/macos" target="_blank" rel="noopener">Ollama · macOS</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>8</span></button><div class="body">
+    <h3>Download a private model</h3>
+    <p>Open <b style="font-weight:500">Terminal</b> (press ⌘ Space, type Terminal, press Return) and paste the command for your Mac's memory. Downloads are large, so let it finish.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Your memory</th><th>Starting model</th><th>Download</th></tr></thead>
+      <tbody>
+        <tr><td class="num">36–64 GB</td><td>Gemma 4 (26B)</td><td class="num">~16–19 GB</td></tr>
+        <tr><td class="num">96–128 GB+</td><td>gpt-oss (120B)</td><td class="num">~65 GB</td></tr>
+      </tbody>
+    </table></div>
+    <div class="cmd"><code>ollama pull gemma4</code><button type="button" class="copy">Copy</button></div>
+    <div class="cmd"><code>ollama pull gpt-oss:120b</code><button type="button" class="copy">Copy</button></div>
+    <p class="see">Done when Terminal shows <b>success</b>. Brad will confirm the best model for your exact Mac; bigger models are smarter but need more memory.</p>
+    <p class="src">Sources: <a href="https://ollama.com/library/gemma4" target="_blank" rel="noopener">ollama.com/library/gemma4</a> · <a href="https://ollama.com/library/gpt-oss" target="_blank" rel="noopener">ollama.com/library/gpt-oss</a> · <a href="https://docs.openclaw.ai/gateway/local-models" target="_blank" rel="noopener">OpenClaw · local models</a></p>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p3" data-title="3 · Agent"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 3 · about 30 minutes · Brad does this with you</span><h2>Install your agent</h2>
+  <p class="meta muted">Your agent runs on OpenClaw, the same open-source foundation Lucius is built on. It runs in the background all the time and connects your AI to your phone.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>9</span></button><div class="body">
+    <h3>Install OpenClaw</h3>
+    <p>Paste this into Terminal. It installs everything it needs, then starts the setup wizard.</p>
+    <div class="cmd"><code>curl -fsSL https://openclaw.ai/install.sh | bash</code><button type="button" class="copy">Copy</button></div>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/install" target="_blank" rel="noopener">OpenClaw · Install</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>10</span></button><div class="body">
+    <h3>Run the setup wizard and choose the private model</h3>
+    <p>If the wizard didn't open by itself, start it with the command below. Choose <span class="path">Custom setup</span>, then for the model choose <span class="path">Ollama › Local only</span>.</p>
+    <div class="cmd"><code>openclaw onboard --install-daemon</code><button type="button" class="copy">Copy</button></div>
+    <p>The <code style="font-family:var(--mono);font-size:.85rem">--install-daemon</code> part makes your agent start automatically and keep running in the background.</p>
+    <p class="see">Check it's running: <span class="path">openclaw gateway status</span> should show it's <b>running</b>.</p>
+    <div class="cmd"><code>openclaw gateway status</code><button type="button" class="copy">Copy</button></div>
+    <p class="src">Sources: <a href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noopener">OpenClaw · Getting started</a> · <a href="https://docs.openclaw.ai/providers/ollama" target="_blank" rel="noopener">OpenClaw · Ollama</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>11</span></button><div class="body">
+    <h3>Optional: add a smarter cloud model for non-patient work</h3>
+    <p>For marketing, writing and research (never patient information), your agent can also use ChatGPT or Claude. If you have a ChatGPT subscription, sign in with:</p>
+    <div class="cmd"><code>openclaw models auth login --provider openai</code><button type="button" class="copy">Copy</button></div>
+    <div class="callout"><p><b>Rule:</b> anything about patients stays on the private local model. Cloud models are only for public-facing work like posts, blogs and emails.</p></div>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/providers/openai/setup" target="_blank" rel="noopener">OpenClaw · OpenAI</a></p>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p4" data-title="4 · Phone"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 4 · about 15 minutes</span><h2>Talk to it from your phone</h2>
+  <p class="meta muted">We'll start with Telegram, the simplest and most reliable option. You'll message your agent like a contact.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>12</span></button><div class="body">
+    <h3>Create your agent's Telegram account</h3>
+    <ol><li>Install <b style="font-weight:500">Telegram</b> on your iPhone and sign up.</li><li>Search for <b style="font-weight:500">@BotFather</b> (blue check mark) and open it.</li><li>Send <span class="path">/newbot</span>, then choose your agent's name and a username ending in "bot".</li><li>BotFather replies with a <b style="font-weight:500">token</b> (a long code). Send it to Brad privately; don't post it anywhere.</li></ol>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/channels/telegram/setup" target="_blank" rel="noopener">OpenClaw · Telegram setup</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>13</span></button><div class="body">
+    <h3>Connect Telegram to your agent <span class="muted" style="font-weight:400">· Brad does this with you</span></h3>
+    <div class="cmd"><code>openclaw channels add --channel telegram --token &lt;your-bot-token&gt;</code><button type="button" class="copy">Copy</button></div>
+    <div class="cmd"><code>openclaw channels status --probe</code><button type="button" class="copy">Copy</button></div>
+    <p>Now message your bot "hello" from your iPhone. It replies with a pairing code. Approve yourself so only you can talk to it:</p>
+    <div class="cmd"><code>openclaw pairing approve telegram &lt;CODE&gt;</code><button type="button" class="copy">Copy</button></div>
+    <p class="see">Done when your agent <b>answers you on your phone</b>.</p>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/channels/telegram/setup" target="_blank" rel="noopener">OpenClaw · Telegram setup</a> · <a href="https://docs.openclaw.ai/channels/pairing" target="_blank" rel="noopener">Pairing</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>14</span></button><div class="body">
+    <h3>Reach your Mac securely from anywhere</h3>
+    <p>Install <b style="font-weight:500">Tailscale</b> on the Mac (<a href="https://tailscale.com/download/mac" target="_blank" rel="noopener">tailscale.com/download/mac</a>) and on your iPhone (App Store), and sign in to the same account on both. This creates a private, encrypted link between your devices only.</p>
+    <p>Then Brad turns on private dashboard access:</p>
+    <div class="cmd"><code>openclaw gateway --tailscale serve</code><button type="button" class="copy">Copy</button></div>
+    <div class="callout"><p><b>Never use "Funnel".</b> It would make your agent public on the internet.</p></div>
+    <p class="src">Sources: <a href="https://tailscale.com/kb/1016/install-mac" target="_blank" rel="noopener">Tailscale · Mac</a> · <a href="https://tailscale.com/kb/1020/install-ios" target="_blank" rel="noopener">Tailscale · iPhone</a> · <a href="https://docs.openclaw.ai/gateway/tailscale" target="_blank" rel="noopener">OpenClaw · Tailscale</a></p>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p5" data-title="5 · Personality"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 5 · the fun part · about 30 minutes together</span><h2>Give it a name and a personality</h2>
+  <p class="meta muted">Your agent reads a few short files every time it starts. These make it yours. They live in your agent's workspace folder on the Mac.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>15</span></button><div class="body">
+    <h3>IDENTITY: its name</h3>
+    <p>Pick a name and a one-line description. Lucius is Brad's; yours can be anything you like.</p>
+    <p class="see">Example: "Name: Sterling. A calm, precise assistant for Lefkowitz Plastic Surgery."</p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>16</span></button><div class="body">
+    <h3>SOUL: how it talks and what it won't do</h3>
+    <p>Its tone and its boundaries. For example: warm and concise; never gives medical advice to patients; always asks before sending anything outside the practice.</p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>17</span></button><div class="body">
+    <h3>USER: about you</h3>
+    <p>How you like to work: your schedule, how you like updates (short or detailed), the practice's priorities, who's on your team.</p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>18</span></button><div class="body">
+    <h3>AGENTS: its job description</h3>
+    <p>What it does day to day: draft posts and emails for approval, summarize your day, prepare consult briefs, keep notes. Its memory builds over time from your conversations.</p>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/concepts/agent-workspace" target="_blank" rel="noopener">OpenClaw · Agent workspace</a> · <a href="https://docs.openclaw.ai/concepts/memory" target="_blank" rel="noopener">Memory</a></p>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p6" data-title="6 · Lock down"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 6 · about 20 minutes · Brad does this with you</span><h2>Lock it down</h2>
+  <p class="meta muted">Before any practice information goes in, we tighten the settings.</p></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>19</span></button><div class="body">
+    <h3>Keep its memory search on the Mac</h3>
+    <p>By default, the memory search feature uses an outside service. Brad switches it to a local option so your notes never leave the Mac.</p>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/concepts/memory" target="_blank" rel="noopener">OpenClaw · Memory</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>20</span></button><div class="body">
+    <h3>Apply the security baseline and run the audit</h3>
+    <p>Brad applies OpenClaw's hardened security settings (limits what the agent can touch on the Mac), then runs the built-in check:</p>
+    <div class="cmd"><code>openclaw security audit --deep</code><button type="button" class="copy">Copy</button></div>
+    <p class="see">Done when the audit comes back <b>clean</b>.</p>
+    <p class="src">Sources: <a href="https://docs.openclaw.ai/gateway/security" target="_blank" rel="noopener">OpenClaw · Security</a> · <a href="https://docs.openclaw.ai/gateway/security/hardened-baseline" target="_blank" rel="noopener">Hardened baseline</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>21</span></button><div class="body">
+    <h3>Agree the patient-data rules</h3>
+    <ul><li>No patient information until your compliance review is done.</li><li>Patient work only on the private local model, never a cloud model.</li><li>Only you (and anyone you approve) can message the agent.</li><li>Add-on "skills" from the internet only after Brad reviews them.</li></ul>
+  </div></div>
+</div></section>
+
+<section class="phase" id="p7" data-title="7 · Go live"><div class="wrap">
+  <div class="phase-head"><span class="eyebrow">Phase 7 · ongoing</span><h2>Go live and keep it healthy</h2></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>22</span></button><div class="body">
+    <h3>Your first week with it</h3>
+    <p>Talk to it every day. Try: "Draft three Instagram captions about deep plane facelift recovery." "Summarize this article for me." "Remind me what we discussed on Monday." The more you use it, the more it learns how you work.</p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>23</span></button><div class="body">
+    <h3>Monthly: update it</h3>
+    <p>After a Time Machine backup, run:</p>
+    <div class="cmd"><code>openclaw update</code><button type="button" class="copy">Copy</button></div>
+    <div class="cmd"><code>openclaw doctor --fix</code><button type="button" class="copy">Copy</button></div>
+    <p class="src">Source: <a href="https://docs.openclaw.ai/install/updating" target="_blank" rel="noopener">OpenClaw · Updating</a></p>
+  </div></div>
+
+  <div class="step"><button class="check" type="button" aria-pressed="false"><span>24</span></button><div class="body">
+    <h3>Next: the practice system</h3>
+    <p>Once your personal agent is running, we build on the same Mac: the marketing engine, then the patient pipeline, following the 30/60/90-day plan in the proposal.</p>
+    <p><a href="../" style="font-family:var(--display);letter-spacing:.12em;text-transform:uppercase;font-size:.85rem">← Back to the proposal</a></p>
+  </div></div>
+</div></section>
+
+</main>
+
+<footer><div class="wrap">
+  <p>Every command and setting on this page comes from the official Apple, Ollama, Tailscale and OpenClaw documentation linked under each step (checked October 31, 2026). Software changes, so if a screen looks different, text Brad before guessing.</p>
+  <button class="reset" type="button" id="reset">Clear my checkmarks</button>
+</div></footer>
+
+<script>
+(function () {
+  var KEY = 'lefk-setup-v1';
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  var phases = Array.prototype.slice.call(document.querySelectorAll('section.phase'));
+  var map = document.getElementById('map');
+  map.innerHTML = phases.map(function (p) { return '<a href="#' + p.id + '" data-p="' + p.id + '">' + p.dataset.title + '</a>'; }).join('');
+  function render() {
+    var done = 0;
+    steps.forEach(function (s, i) {
+      var on = !!state[i];
+      s.classList.toggle('done', on);
+      var b = s.querySelector('.check');
+      b.setAttribute('aria-pressed', String(on));
+      b.setAttribute('aria-label', (on ? 'Mark not done: ' : 'Mark done: ') + s.querySelector('h3').textContent);
+      b.querySelector('span').textContent = on ? '✓' : String(i + 1);
+      if (on) done++;
+    });
+    document.getElementById('bar').style.width = (100 * done / steps.length) + '%';
+    document.getElementById('pct').textContent = done + ' of ' + steps.length;
+    phases.forEach(function (p) {
+      var ss = p.querySelectorAll('.step'), all = ss.length > 0;
+      ss.forEach(function (s) { if (!s.classList.contains('done')) all = false; });
+      var a = map.querySelector('[data-p="' + p.id + '"]'); if (a) a.classList.toggle('done', all);
+    });
+  }
+  steps.forEach(function (s, i) {
+    s.querySelector('.check').addEventListener('click', function () { state[i] = !state[i]; save(); render(); });
+  });
+  document.getElementById('reset').addEventListener('click', function () { state = {}; save(); render(); });
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var code = b.parentNode.querySelector('code');
+      var txt = code.textContent;
+      function ok() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); }
+      function sel() { var r = document.createRange(); r.selectNodeContents(code); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); }
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(ok, sel); } else { sel(); }
+    });
+  });
+  render();
+})();
+</script>
+</body>
+</html>
