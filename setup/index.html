@@ -191,10 +191,10 @@ footer p { font-size: .9rem; color: var(--muted); }
         <tr><td class="num">96–128 GB+</td><td>gpt-oss (120B)</td><td class="num">~65 GB</td></tr>
       </tbody>
     </table></div>
-    <div class="cmd"><code>ollama pull gemma4</code><button type="button" class="copy">Copy</button></div>
+    <div class="cmd"><code>ollama pull gemma4:26b</code><button type="button" class="copy">Copy</button></div>
     <div class="cmd"><code>ollama pull gpt-oss:120b</code><button type="button" class="copy">Copy</button></div>
-    <p class="see">Done when Terminal shows <b>success</b>. Brad will confirm the best model for your exact Mac; bigger models are smarter but need more memory.</p>
-    <p class="src">Sources: <a href="https://ollama.com/library/gemma4" target="_blank" rel="noopener">ollama.com/library/gemma4</a> · <a href="https://ollama.com/library/gpt-oss" target="_blank" rel="noopener">ollama.com/library/gpt-oss</a> · <a href="https://docs.openclaw.ai/gateway/local-models" target="_blank" rel="noopener">OpenClaw · local models</a></p>
+    <p class="see">Type the name exactly as shown. Plain <span class="path">gemma4</span> downloads a much smaller model. Done when Terminal shows <b>success</b>. Brad will confirm the best model for your exact Mac; bigger models are smarter but need more memory.</p>
+    <p class="src">Sources: <a href="https://ollama.com/library/gemma4/tags" target="_blank" rel="noopener">ollama.com/library/gemma4</a> · <a href="https://ollama.com/library/gpt-oss" target="_blank" rel="noopener">ollama.com/library/gpt-oss</a> · <a href="https://docs.openclaw.ai/gateway/local-models" target="_blank" rel="noopener">OpenClaw · local models</a></p>
   </div></div>
 </div></section>
 
@@ -211,12 +211,18 @@ footer p { font-size: .9rem; color: var(--muted); }
 
   <div class="step"><button class="check" type="button" aria-pressed="false"><span>10</span></button><div class="body">
     <h3>Run the setup wizard and choose the private model</h3>
-    <p>If the wizard didn't open by itself, start it with the command below. Choose <span class="path">Custom setup</span>, then for the model choose <span class="path">Ollama › Local only</span>.</p>
-    <div class="cmd"><code>openclaw onboard --install-daemon</code><button type="button" class="copy">Copy</button></div>
-    <p>The <code style="font-family:var(--mono);font-size:.85rem">--install-daemon</code> part makes your agent start automatically and keep running in the background.</p>
-    <p class="see">Check it's running: <span class="path">openclaw gateway status</span> should show it's <b>running</b>.</p>
+    <p>The installer opens the setup wizard by itself. If it didn't, start it with the command below. Choose <span class="path">Custom setup</span>, then for the model choose <span class="path">Ollama › Local only</span>.</p>
+    <div class="cmd"><code>openclaw onboard</code><button type="button" class="copy">Copy</button></div>
+    <p>When it asks for the Ollama address, enter exactly:</p>
+    <div class="cmd"><code>http://127.0.0.1:11434</code><button type="button" class="copy">Copy</button></div>
+    <div class="callout"><p><b>Not the /v1 address.</b> An address ending in <span class="path">/v1</span> breaks your agent's tools.</p></div>
+    <p>When the wizard finishes, your agent is running inside the Terminal window and would stop if you closed it. To keep it running all the time, press <b style="font-weight:500">Control-C</b> in Terminal, then run:</p>
+    <div class="cmd"><code>openclaw gateway install</code><button type="button" class="copy">Copy</button></div>
+    <p>This sets your agent to start by itself and keep running in the background.</p>
+    <p class="see">Check it's running: close Terminal, open a new Terminal window and run <span class="path">openclaw gateway status</span>. It should show it's <b>running</b> on port 18789.</p>
     <div class="cmd"><code>openclaw gateway status</code><button type="button" class="copy">Copy</button></div>
-    <p class="src">Sources: <a href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noopener">OpenClaw · Getting started</a> · <a href="https://docs.openclaw.ai/providers/ollama" target="_blank" rel="noopener">OpenClaw · Ollama</a></p>
+    <p><b style="font-weight:500">Optional menu-bar app.</b> The OpenClaw Mac app (needs macOS 26.2 or later) shows your agent's status and lets you chat with it. Install it after this step and it connects to the agent you just set up. If you ever set up through the app instead of Terminal, turn on <span class="path">Keep OpenClaw running when the app is closed</span> and <span class="path">Launch at login</span>; both start off.</p>
+    <p class="src">Sources: <a href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noopener">OpenClaw · Getting started</a> · <a href="https://docs.openclaw.ai/providers/ollama" target="_blank" rel="noopener">OpenClaw · Ollama</a> · <a href="https://docs.openclaw.ai/platforms/macos" target="_blank" rel="noopener">OpenClaw · macOS app</a> · <a href="https://docs.openclaw.ai/platforms/mac/bundled-gateway" target="_blank" rel="noopener">Mac app background service</a></p>
   </div></div>
 
   <div class="step"><button class="check" type="button" aria-pressed="false"><span>11</span></button><div class="body">
@@ -251,8 +257,9 @@ footer p { font-size: .9rem; color: var(--muted); }
   <div class="step"><button class="check" type="button" aria-pressed="false"><span>14</span></button><div class="body">
     <h3>Reach your Mac securely from anywhere</h3>
     <p>Install <b style="font-weight:500">Tailscale</b> on the Mac (<a href="https://tailscale.com/download/mac" target="_blank" rel="noopener">tailscale.com/download/mac</a>) and on your iPhone (App Store), and sign in to the same account on both. This creates a private, encrypted link between your devices only.</p>
-    <p>Then Brad turns on private dashboard access:</p>
-    <div class="cmd"><code>openclaw gateway --tailscale serve</code><button type="button" class="copy">Copy</button></div>
+    <p>Then Brad turns on private dashboard access and restarts the agent so it takes effect:</p>
+    <div class="cmd"><code>openclaw config set gateway.tailscale.mode serve</code><button type="button" class="copy">Copy</button></div>
+    <div class="cmd"><code>openclaw gateway restart</code><button type="button" class="copy">Copy</button></div>
     <div class="callout"><p><b>Never use "Funnel".</b> It would make your agent public on the internet.</p></div>
     <p class="src">Sources: <a href="https://tailscale.com/kb/1016/install-mac" target="_blank" rel="noopener">Tailscale · Mac</a> · <a href="https://tailscale.com/kb/1020/install-ios" target="_blank" rel="noopener">Tailscale · iPhone</a> · <a href="https://docs.openclaw.ai/gateway/tailscale" target="_blank" rel="noopener">OpenClaw · Tailscale</a></p>
   </div></div>
@@ -335,7 +342,7 @@ footer p { font-size: .9rem; color: var(--muted); }
 </main>
 
 <footer><div class="wrap">
-  <p>Every command and setting on this page comes from the official Apple, Ollama, Tailscale and OpenClaw documentation linked under each step (checked October 31, 2026). Software changes, so if a screen looks different, text Brad before guessing.</p>
+  <p>Every command and setting on this page comes from the official Apple, Ollama, Tailscale and OpenClaw documentation linked under each step (checked October 31, 2026; steps 8, 10 and 14 rechecked November 1, 2026). Software changes, so if a screen looks different, text Brad before guessing.</p>
   <button class="reset" type="button" id="reset">Clear my checkmarks</button>
 </div></footer>
 
